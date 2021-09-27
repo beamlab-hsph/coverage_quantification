@@ -4,8 +4,8 @@ import h5py
 import os 
 import argparse
 
-INTERIM_DIR = "/data/interim"
-PROCESSED_DIR = "/data/processed"
+INTERIM_DIR = "./data/interim"
+PROCESSED_DIR = "./data/processed"
 
 
 def calculate_coverage_statistics(dataset):

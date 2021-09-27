@@ -5,15 +5,19 @@ import numpy as np
 
 from src.data.data_utils import * 
 
-with open('./data/processed/model_output_summary_svi_eb.csv', 'a') as csv_file:
+with open('/Users/kompa/Downloads/model_output_summary_bayesian_lr.csv', 'a') as csv_file:
   field_names = ['dataset', 'method', 'split', 'traintest', 'coverage', 'width', 'rmse']
   csv_writer = csv.DictWriter(csv_file, fieldnames=field_names)
   csv_writer.writeheader()
-  with h5py.File('./data/processed/model_outputs_svi_eb.hdf5', 'r') as f: 
-    for _DATASET in os.listdir('data/DropoutUncertaintyExps/UCI_Datasets'): 
-      for _METHOD in ['svi', 'll_svi']: 
+  with h5py.File('/Users/kompa/Downloads/model_ouputs_bayesian_lr.hdf5', 'r') as f: 
+    for _DATASET in os.listdir('/Users/kompa/Repos/DropoutUncertaintyExps/UCI_Datasets/'): 
+      # trouble converging
+      if _DATASET == 'naval-propulsion-plant':
+        continue
+      for _METHOD in ['bayesian_lr']: 
         for _SPLIT in range(20 if _DATASET !='protein-tertiary-structure' else 5):
-          X_train, y_train, X_validation, y_validation, X_test, y_test = _get_data_splits(_DATASET, _SPLIT)
+          print(f"{_DATASET}/{_METHOD}/{_SPLIT}")
+          X_train, y_train, X_validation, y_validation, X_test, y_test = get_data_splits(_DATASET, _SPLIT)
           y_train_val = np.concatenate((y_train, y_validation))
 
 

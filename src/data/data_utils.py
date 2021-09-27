@@ -9,7 +9,7 @@ from sklearn.preprocessing import StandardScaler
 # This git repo should be cloned into /data/ 
 
 def get_data_file_paths(dataset):
-  temp_DATA_DIRECTORY_PATH = f"/data/DropoutUncertaintyExps/UCI_Datasets/{dataset}/data/"
+  temp_DATA_DIRECTORY_PATH = f"./data/DropoutUncertaintyExps/UCI_Datasets/{dataset}/data/"
   temp_INDEX_FEATURES_FILE = temp_DATA_DIRECTORY_PATH + "index_features.txt"
   temp_INDEX_TARGET_FILE = temp_DATA_DIRECTORY_PATH + "index_target.txt"
   temp_DATA_FILE = temp_DATA_DIRECTORY_PATH + "data.txt"

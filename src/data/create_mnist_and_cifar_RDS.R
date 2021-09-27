@@ -5,8 +5,8 @@ library(stringr)
 # mnist_data <- readr::read_delim('mnist_coverage_widths.csv', delim=',')
 # cifar_data <- readr::read_delim('cifar_coverage_widths.csv', delim=',')
 
-mnist_data <- readr::read_delim('/data/processed/mnist_coverage_widths.csv', delim=',')
-cifar_data <- readr::read_delim('data/processed/cifar_coverage_widths.csv', delim=',')
+mnist_data <- readr::read_delim('./data/processed/mnist_coverage_widths.csv', delim=',')
+cifar_data <- readr::read_delim('./data/processed/cifar_coverage_widths.csv', delim=',')
 
 create_tidy_df <- function(dataset, split){
   
@@ -97,4 +97,4 @@ uq_tidy <- rbind(mnist_tidy, cifar_tidy)
 uq_tidy$method[uq_tidy$method=='dropout_nofirst'] <- 'dropout'
 
 
-saveRDS(object = uq_tidy, file='data/processed/uq_tidy.rds')
+saveRDS(object = uq_tidy, file='./data/processed/uq_tidy.rds')

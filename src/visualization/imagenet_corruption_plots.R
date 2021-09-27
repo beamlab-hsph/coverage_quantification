@@ -7,7 +7,7 @@ library(plotrix)
 
 eps_level <- .05
 
-imagenet_tidy <- readRDS('/data/processed/imagenet_tidy.rds')
+imagenet_tidy <- readRDS('./data/processed/imagenet_tidy.rds')
 imagenet_df <- imagenet_tidy %>% filter(dataset=='imagenet' & eps==eps_level)
 
 
@@ -54,7 +54,7 @@ p_coverage <- ggplot(imagenet_df,
 
 
 p_coverage
-ggsave('/reports/figures/imagenet_corruption_coverage.png', device = 'png', p_coverage, width=10, height=4, units='in')
+ggsave('./reports/figures/imagenet_corruption_coverage.png', device = 'png', p_coverage, width=10, height=4, units='in')
 
 p_width <- ggplot(imagenet_df, 
                   aes(x=factor(method), 
@@ -73,7 +73,7 @@ p_width <- ggplot(imagenet_df,
                        labels=c("Dropout", "Ensemble", "LL Dropout", "LL SVI", "SVI", "Temp Scaling", "Vanilla"))
 
 p_width
-ggsave('/reports/figures/imagenet_corruption_width.png', device = 'png', p_width, width=10, height=4, units='in')
+ggsave('./reports/figures/imagenet_corruption_width.png', device = 'png', p_width, width=10, height=4, units='in')
 
 # p_entropy <- ggplot(imagenet_entropy_df, 
 #                     aes(x=factor(method), 
@@ -116,6 +116,5 @@ table_3_test %>%
   mutate(coverage = round(mean_coverage,4)) %>%
   mutate(width = round(mean_width,4)) %>%
   #pivot_wider(names_from=dataset, values_from = coverage) %>%
-  write_csv(., '/reports/tables/imagenet_corruption_testset.csv')
+  write_csv(., './reports/tables/imagenet_corruption_testset.csv')
 
-#write_csv(cbind(table_3_test, table_3), '~/Downloads/table3.csv')

@@ -98,7 +98,7 @@ def predict_N_times(model, test_set, y_norm, num_predictions=200):
   return predictions
 
 def compute_quantiles(predictions):
-  return np.quantile(predictions, [.05, .95], axis=1)
+  return np.quantile(predictions, [.025, .975], axis=1)
 
 def compute_coverage(predictions, y_norm, y_test):
   y_invnorm = y_norm.inverse_transform(y_test)

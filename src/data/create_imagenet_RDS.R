@@ -3,7 +3,7 @@ library(magrittr)
 library(stringr)
 
 
-imagenet_data <- readr::read_delim('/data/processed/imagenet_coverage_widths.csv', delim=',')
+imagenet_data <- readr::read_delim('./data/processed/imagenet_coverage_widths.csv', delim=',')
 
 create_tidy_df <- function(dataset, split){
   
@@ -44,4 +44,4 @@ for(split in imagenet_splits){
 }
 imagenet_tidy$dataset <- 'imagenet'
 
-saveRDS(object = imagenet_tidy, file='/data/processed/R/coverage_properties/imagenet_tidy.rds')
+saveRDS(object = imagenet_tidy, file='./data/processed/R/coverage_properties/imagenet_tidy.rds')

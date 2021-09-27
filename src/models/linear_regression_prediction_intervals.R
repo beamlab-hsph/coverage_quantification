@@ -4,7 +4,7 @@ library(effectsize)
 library(zeallot)
 
 get_data_file_paths <- function(dataset){
-  temp_DATA_DIRECTORY_PATH = file.path("/data/DropoutUncertaintyExps/UCI_Datasets",dataset,"data")
+  temp_DATA_DIRECTORY_PATH = file.path("./data/DropoutUncertaintyExps/UCI_Datasets",dataset,"data")
   temp_INDEX_FEATURES_FILE = file.path(temp_DATA_DIRECTORY_PATH,"index_features.txt")
   temp_INDEX_TARGET_FILE = file.path(temp_DATA_DIRECTORY_PATH,"index_target.txt")
   temp_DATA_FILE = file.path(temp_DATA_DIRECTORY_PATH,"data.txt")
@@ -62,7 +62,7 @@ get_data_splits <- function(dataset, split){
               y_test=y_test))
 }
 
-for(DATASET in list.files('/data/DropoutUncertaintyExps/UCI_Datasets/')){
+for(DATASET in list.files('./data/DropoutUncertaintyExps/UCI_Datasets/')){
   for(SPLIT in 0:19){
     if(DATASET=='protein-tertiary-structure' && SPLIT>4){
       next

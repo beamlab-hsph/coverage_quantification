@@ -12,8 +12,8 @@ import argparse
 # !gsutil cp gs://uq-benchmark-2019/mnist_model_predictions.hdf5 "mnist_model_predictions.hdf5"
 # !gsutil cp gs://uq-benchmark-2019/cifar_model_predictions.hdf5 "cifar_model_predictions.hdf5"
 
-RAW_DIR = "/data/raw/"
-INTERIM_DIR = "/data/interim"
+RAW_DIR = "./data/raw/"
+INTERIM_DIR = "./data/interim"
 
 
 def get_credible_set(arr, epsilon):

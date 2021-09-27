@@ -5,7 +5,8 @@ library(cowplot)
 library(kableExtra)
 library(egg)
 
-uq_tidy <- readRDS('/data/processed/uq_tidy.rds')
+base_dir <- '~/Repos/coverage-quantification/' #wd should be parent dir of the repo
+uq_tidy <- readRDS(paste0(base_dir, '/data/processed/uq_tidy.rds'))
 
 
 create_coverage_plot <- function(dataset_name, split, eps_level){
@@ -121,7 +122,7 @@ create_coverage_plot <- function(dataset_name, split, eps_level){
     ylab('Coverage')+
     labs(color='Method')+
     geom_hline(yintercept = 1-eps_level, color='black')+
-    ylim(c(0, 1))+
+    scale_y_continuous(labels = scales::percent, limits = c(0,1))+
     scale_color_discrete(name="Method",
                          breaks=c("dropout", "ensemble", "ll_dropout", "ll_svi", "svi", "temp_scaling", 'vanilla'),
                          labels=c("Dropout", "Ensemble", "LL Dropout", "LL SVI", "SVI", "Temp Scaling", "Vanilla"))
@@ -260,24 +261,34 @@ EPS = .05
 
 
 mnist_rot_coverage <- create_coverage_plot('mnist', 'rot', .05)['plot']
-ggsave('/reports/figures/tidy_data/mnist_rot_coverage_no_standard.png', width=10, height=4, units='in', dpi=300)
+ggsave('./reports/figures/tidy_data/mnist_rot_coverage_no_standard.png', width=10, height=4, units='in', dpi=300)
+
 
 
 
 mnist_rot_width <- create_width_plot('mnist', 'rot', .05)['plot']
-ggsave('/reports/figures/mnist_rot_width_no_standard.png', width=10, height=4, units='in', dpi=300)
+ggsave('./reports/figures/mnist_rot_width_no_standard.png', width=10, height=4, units='in', dpi=300)
 
 create_entropy_plot('mnist', 'rot', .05)['plot']
-ggsave('/reports/figures/mnist_rot_entropy_no_standard.png', width=10, height=4, units='in', dpi=300)
+ggsave('./reports/figures/mnist_rot_entropy_no_standard.png', width=10, height=4, units='in', dpi=300)
 
 
 
+mnist_roll_width_list <- create_width_plot('mnist', 'roll', .05)
 
-tiff('/reports/figures/mnist_roll_coverage.tiff', width=10, height=4, units='in', res=300)
+roll_df <- mnist_roll_width_list$filtered_df
+
+roll_data <- roll_df %>% 
+  filter(method=='svi') %>% 
+  arrange(ordering, width)
+
+cor(roll_data$width,  -1*abs(roll_data$ordering-14)+14)
+
+tiff('./reports/figures/mnist_roll_coverage.tiff', width=10, height=4, units='in', res=300)
 mnist_roll_coverage <- create_coverage_plot('mnist', 'roll', .05)['plot']
 dev.off()
 
-tiff('/reports/figures/mnist_roll_width.tiff', width=10, height=4, units='in', res=300)
+tiff('./reports/figures/mnist_roll_width.tiff', width=10, height=4, units='in', res=300)
 mnist_roll_width <- create_width_plot('mnist', 'roll', .05)['plot']
 dev.off()
 
@@ -300,13 +311,13 @@ fig1 <- ggarrange(mnist_rot_coverage$plot + theme(legend.position = "none") + Ax
             theme( axis.title.y = element_blank())+ Axis_Theme+rot_y_theme, 
           nrow=2)
 
-ggsave('/reports/figures/mnist_fig1.png', plot=fig1, width=10, height=5.6, units='in', dpi=300)
+ggsave(paste0(base_dir, '/reports/figures/mnist_fig1.png'), plot=fig1, width=10, height=5.6, units='in', dpi=300)
 
 fig1a <- ggarrange(mnist_rot_coverage$plot + theme(legend.position = "none") + Axis_Theme,
                   mnist_rot_width$plot + theme(legend.position = "none")+ Axis_Theme, 
                   nrow=2)
 
-ggsave('/reports/figures/mnist_fig1a.png', plot=fig1a, width=10, height=12.26, units = 'in', dpi=300)
+ggsave('./reports/figures/mnist_fig1a.png', plot=fig1a, width=10, height=12.26, units = 'in', dpi=300)
 
 fig1b <- ggarrange(mnist_roll_coverage$plot + 
                      theme( axis.title.y = element_blank())+ Axis_Theme+rot_y_theme,
@@ -314,21 +325,48 @@ fig1b <- ggarrange(mnist_roll_coverage$plot +
                      theme( axis.title.y = element_blank())+ Axis_Theme+rot_y_theme, 
                    nrow=2)
 
-ggsave('/reports/figures/mnist_fig1b.png', plot=fig1b, width=10, height=12.26, units = 'in', dpi=300)
+ggsave('./reports/figures/mnist_fig1b.png', plot=fig1b, width=10, height=12.26, units = 'in', dpi=300)
 
 
 
 
 cifar_coverage <- create_coverage_plot('cifar', 'cifar_roll', .05)['plot']
 
-cifar_width <- create_width_plot('cifar', 'cifar_roll', .05)['plot']
+cifar_width_list <- create_width_plot('cifar', 'cifar_roll', .05)
+cifar_width <- cifar_width_list$plot
+cifar_filtered_df <- cifar_width_list$filtered_df
+
+fig2_revised <- ggplot(data = cifar_filtered_df %>% 
+                         group_by(method, ordering) %>%
+                         summarise(mean_coverage = mean(coverage)>1-EPS, 
+                                   mean_width = mean(width)),
+                       aes(x=ordering,
+                           y=mean_width, 
+                           color=factor(method), 
+                           group=factor(method),
+                           shape=factor(mean_coverage))
+                       )+
+                  geom_point(size=3)+
+                  geom_line()+
+                  theme_bw()+
+                  xlab('Shift (Pixels)')+
+                  ylab('Width (SD)')+
+                scale_shape_manual(values=c(0, 15))+
+                  labs(color='Method')+ scale_y_continuous(labels=scaleFUN)+
+                  ylim(1, 3)+
+                    labs(shape='0.95 Coverage')+
+                  scale_color_discrete(name="Method",
+                                       breaks=c("dropout", "ensemble", "ll_dropout", "ll_svi", "svi", "temp_scaling", 'vanilla'),
+                                       labels=c("Dropout", "Ensemble", "LL Dropout", "LL SVI", "SVI", "Temp Scaling", "Vanilla"))
+
+ggsave(paste0(base_dir, '/reports/figures/revised_fig2.png'), fig2_revised, width=7.5, height=3)
 
 fig2 <- ggarrange(cifar_coverage$plot + theme(legend.position = "none") + Axis_Theme,
                   cifar_width$plot+ 
                     theme( axis.title.y = element_blank())+ Axis_Theme+ theme(
                       axis.title.y = element_text(angle=90)), 
                   nrow=1)
-ggsave('/reports/figures/cifar_fig2.png', plot=fig2, width=10, height=3.472, units = 'in', dpi=300)
+ggsave('./reports/figures/cifar_fig2.png', plot=fig2, width=10, height=3.472, units = 'in', dpi=300)
 
 # Table of iid MNIST 
 mnist_standard <- uq_tidy %>% filter(dataset=='mnist' & eps==.05) %>% filter(split=='test' | split=='train' | split=='valid')
@@ -404,7 +442,7 @@ test_df <- cifar_standard %>%
   filter(split=='test')
 
 bind_cols(train_df, val_df %>% select(-method), test_df %>% select(-method)) %>% 
-  write_csv(., '/reports/tables/cifar_table.csv')
+  write_csv(., './reports/tables/cifar_table.csv')
 
 mnist_rot_df <- create_coverage_plot('mnist', 'rot', .05)[['filtered_df']]
 
@@ -421,7 +459,7 @@ mnist_rot_df %>%
   mutate(se_width = paste0("(", formatC(se_width,format="E", digits=2), ")")) %>%
   unite(col='coverage',mean_coverage, se_coverage, sep=' ') %>% 
   unite(col='width',mean_width, se_width, sep=' ')%>% 
-  write_csv(., '/reports/tables/mnist_rot.csv')
+  write_csv(., './reports/tables/mnist_rot.csv')
 
 mnist_roll_df <- create_coverage_plot('mnist', 'roll', .05)[['filtered_df']]
 
@@ -438,7 +476,7 @@ mnist_roll_df %>%
   mutate(se_width = paste0("(", formatC(se_width,format="E", digits=2), ")")) %>%
   unite(col='coverage',mean_coverage, se_coverage, sep=' ') %>% 
   unite(col='width',mean_width, se_width, sep=' ')%>% 
-  write_csv(., '/reports/tables/mnist_roll.csv')
+  write_csv(., './reports/tables/mnist_roll.csv')
 
 cifar_roll_df <- create_coverage_plot('cifar', 'cifar_roll', .05)[['filtered_df']]
 
@@ -455,6 +493,6 @@ cifar_roll_df %>%
   mutate(se_width = paste0("(", formatC(se_width,format="E", digits=2), ")")) %>%
   unite(col='coverage',mean_coverage, se_coverage, sep=' ') %>% 
   unite(col='width',mean_width, se_width, sep=' ')%>% 
-  write_csv(., '/reports/tables/cifar_roll.csv')
+  write_csv(., './reports/tables/cifar_roll.csv')
   
   
