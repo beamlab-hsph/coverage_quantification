@@ -10,8 +10,8 @@ from sklearn.preprocessing import StandardScaler
 import kerastuner as kt
 import h5py
 
-from src.data.data_utils import * 
-from src.models.find_hyperparameters_svi_methods import * 
+from data_utils import * 
+from find_hyperparameters_svi_methods import * 
 
 
 np.random.seed(0)
@@ -20,8 +20,9 @@ tf.random.set_seed(0)
 
 def main(): 
   parser = argparse.ArgumentParser("Find hyper-parameters for vanilla, Dropout, and LL Dropout networks")
-  parser.add_argument("--method", type=int, help="Method to train")
-  parser.add_argument("--dataset", type=str, help="Dataset to train on")
+  parser.add_argument("--method", type=int, help="Method to train", choices=['vanilla', 'dropout', 'll_dropout'])
+  parser.add_argument("--dataset", type=str, help="Dataset to train on", choices=['bostonHousing', 'concerete', 'energy', 'kin8nm', 
+      'naval-propulsion-plant', 'power-plant', 'protein-tertiary-structure', 'wine-quality-red', 'yacht'])
   parser.add_argument("--outfile" type=str, help="Output path")
   args = parser.parse_args()
 

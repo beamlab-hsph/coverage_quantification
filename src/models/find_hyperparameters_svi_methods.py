@@ -10,14 +10,18 @@ import kerastuner as kt
 from datetime import datetime
 import argparse
 
-from src.data.data_utils import * 
+from data_utils import * 
 
 keras = tf.keras
 tfd = tfp.distributions
 gfile = tf.io.gfile
 
 
-"""# Model building"""
+""" 
+Some of the model building code has been adapted from 
+https://github.com/google-research/google-research/tree/master/uq_benchmark_2019
+Thanks to the work of these researchers and see there for more info!
+"""
 
 negative_log_likelihood = lambda x, rv_x: -rv_x.log_prob(x)
 
@@ -106,9 +110,19 @@ def compute_coverage(predictions, y_norm, y_test):
   covered = np.array([coverage_boundaries[0,i]<y_invnorm[i] and coverage_boundaries[1,i]>y_invnorm[i] for i in range(len(y_invnorm))])
   return covered
 
-"""# SVI Experiments"""
 
-def _build_svi_eb_model(hp): 
+def _build_svi_eb_model(hp):
+  ''' 
+  Build a stochastic variational inference (SVI) model with an Empirical Bayes (EB) prior
+
+    Parameters: 
+      hp (kerastuner.HyperParameters): a hyperparamter object that defines input dimension and the
+      number of training examples
+
+    Returns: 
+      model (keras.Model): a compiled keras model
+
+  '''
   div_fn = make_divergence_fn_for_empirical_bayes(hp.get('std_prior_scale'), hp.get('num_train_examples')//hp.get('batch_size'))
   eb_fn = make_prior_fn_for_empirical_bayes(hp.get('init_prior_scale_mean'), hp.get('init_prior_scale_std'))
   dropout_rate = hp.Float('dropout', min_value=0, max_value=.5, default=0.1)
@@ -148,6 +162,17 @@ def _build_svi_eb_model(hp):
   return model
 
 def _build_ll_svi_eb_model(hp):
+  ''' 
+  Build a last layer stochastic variational inference (SVI) model with an Empirical Bayes (EB) prior
+
+    Parameters: 
+      hp (kerastuner.HyperParameters): a hyperparamter object that defines input dimension and the
+      number of training examples
+
+    Returns: 
+      model (keras.Model): a compiled keras model
+
+  '''
   div_fn = make_divergence_fn_for_empirical_bayes(hp.get('std_prior_scale'), hp.get('num_train_examples')//hp.get('batch_size'))
   eb_fn = make_prior_fn_for_empirical_bayes(hp.get('init_prior_scale_mean'), hp.get('init_prior_scale_std'))
   dropout_rate = hp.Float('dropout', min_value=0, max_value=.5, default=0.1)
@@ -188,6 +213,16 @@ def _build_ll_svi_eb_model(hp):
   return model
 
 def _build_svi_eb_model_tuner(tuner):
+  ''' 
+  Build a stochastic variational inference (SVI) model with an Empirical Bayes (EB) prior
+
+    Parameters: 
+      tuner (EpochRandomTuner): a kerastuner object that has the best hyperparameters
+
+    Returns: 
+      model (keras.Model): a compiled keras model
+
+  '''
   hp = tuner.get_best_hyperparameters()[0]
   div_fn = make_divergence_fn_for_empirical_bayes(hp.get('std_prior_scale'), hp.get('num_train_examples')//hp.get('batch_size'))
   eb_fn = make_prior_fn_for_empirical_bayes(hp.get('init_prior_scale_mean'), hp.get('init_prior_scale_std'))
@@ -226,6 +261,16 @@ def _build_svi_eb_model_tuner(tuner):
   return model
 
 def _build_ll_svi_eb_model_tuner(tuner):
+  ''' 
+  Build a last layer stochastic variational inference (SVI) model with an Empirical Bayes (EB) prior
+
+    Parameters: 
+      tuner (EpochRandomTuner): a kerastuner object that has the best hyperparameters
+
+    Returns: 
+      model (keras.Model): a compiled keras model
+
+  '''
   hp = tuner.get_best_hyperparameters()[0]
   div_fn = make_divergence_fn_for_empirical_bayes(hp.get('std_prior_scale'), hp.get('num_train_examples')//hp.get('batch_size'))
   eb_fn = make_prior_fn_for_empirical_bayes(hp.get('init_prior_scale_mean'), hp.get('init_prior_scale_std'))
@@ -264,14 +309,45 @@ def _build_ll_svi_eb_model_tuner(tuner):
   return model
 
 def _build_model(architecture):
+  ''' 
+  Select a model building function 
+
+    Parameters: 
+      architecture (str): a string which indicates with model builder function to return
+
+    Returns: 
+      function: a model builder function
+  '''
   return {"svi": _build_svi_eb_model, 
           "ll_svi": _build_ll_svi_eb_model}[architecture]
 
 def _build_model_from_tuner(architecture):
+  ''' 
+  Select a model building function
+
+    Parameters: 
+      architecture (str): a string which indicates with model builder function to return
+
+    Returns: 
+      function: a model builder function
+  '''
+
   return {"svi": _build_svi_eb_model_tuner, 
           "ll_svi": _build_ll_svi_eb_model_tuner}[architecture]
 
 def _get_best_tuner(dataset, method, split):
+  ''' 
+  Select the best tuner on a dataset and split and method
+
+    Parameters: 
+      dataset (str): which dataset to train on, one of ['bostonHousing', 'concerete', 'energy', 'kin8nm', 
+      'naval-propulsion-plant', 'power-plant', 'protein-tertiary-structure', 'wine-quality-red', 'yacht']
+      method (str): which model to trian, one of ['svi', 'll_svi']
+      split (int): which data-fold to use. range [0,19] for all datasets except proteins, then [0,4] inclusive.
+
+    Returns: 
+      tuner (EpochRandomTuner): a tuner with best hyperparameters
+  '''
   X_train, y_train, X_validation, y_validation, X_test, y_test = get_data_splits(dataset, split)
   X_train, y_train, X_validation, y_validation, X_test, y_test, X_normalizer, y_normalizer = get_normalized_data(X_train, y_train, X_validation, y_validation, X_test, y_test)
   hp = kt.HyperParameters()
@@ -288,6 +364,18 @@ def _get_best_tuner(dataset, method, split):
   return tuner
 
 def _build_and_train_from_tuner(dataset, method, split, tuner):
+  ''' 
+  Select a model and train it on a dataset and split
+
+    Parameters: 
+      dataset (str): which dataset to train on, one of ['bostonHousing', 'concerete', 'energy', 'kin8nm', 
+      'naval-propulsion-plant', 'power-plant', 'protein-tertiary-structure', 'wine-quality-red', 'yacht']
+      method (str): which model to trian, one of ['svi', 'll_svi']
+      split (int): which data-fold to use. range [0,19] for all datasets except proteins, then [0,4] inclusive.
+
+    Returns: 
+      model (keras.Model): a trained model from the best hyperparameters
+  '''
   X_train, y_train, X_validation, y_validation, X_test, y_test = get_data_splits(dataset, split)
   X_train, y_train, X_validation, y_validation, X_test, y_test, X_normalizer, y_normalizer = get_normalized_data(X_train, y_train, X_validation, y_validation, X_test, y_test)
 
@@ -310,8 +398,10 @@ class EpochRandomTuner(kt.tuners.RandomSearch):
 
 def main():
   parser = argparse.ArgumentParser("Find HPs for SVI and LL-SVI")
-  parser.add_argument("--dataset", type=str, help="Dataset to train on")
-  parser.add_argument("--method", default="", type=str, help="Method to train with (svi or ll_svi")
+  parser.add_argument("--dataset", type=str, help="Dataset to train on", choices=['bostonHousing', 'concerete', 'energy', 'kin8nm', 
+      'naval-propulsion-plant', 'power-plant', 'protein-tertiary-structure', 'wine-quality-red', 'yacht'])
+  parser.add_argument("--method", default="", choices=['svi', 'll_svi'],
+   type=str, help="Method to train with (svi or ll_svi")
   args = parser.parse_args()
 
   """# Find Hyperparameters"""

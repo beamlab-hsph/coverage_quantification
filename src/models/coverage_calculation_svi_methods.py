@@ -3,14 +3,17 @@ import h5py
 import os
 import numpy as np 
 
-from src.data.data_utils import * 
+from data_utils import * 
+
+DATASETS = choices=['bostonHousing', 'concerete', 'energy', 'kin8nm', 
+      'naval-propulsion-plant', 'power-plant', 'protein-tertiary-structure', 'wine-quality-red', 'yacht']
 
 with open('./data/processed/model_output_summary_svi_eb.csv', 'a') as csv_file:
   field_names = ['dataset', 'method', 'split', 'traintest', 'coverage', 'width', 'rmse']
   csv_writer = csv.DictWriter(csv_file, fieldnames=field_names)
   csv_writer.writeheader()
   with h5py.File('./data/processed/model_outputs_svi_eb.hdf5', 'r') as f: 
-    for _DATASET in os.listdir('data/DropoutUncertaintyExps/UCI_Datasets'): 
+    for _DATASET in DATASETS: 
       for _METHOD in ['svi', 'll_svi']: 
         for _SPLIT in range(20 if _DATASET !='protein-tertiary-structure' else 5):
           X_train, y_train, X_validation, y_validation, X_test, y_test = _get_data_splits(_DATASET, _SPLIT)

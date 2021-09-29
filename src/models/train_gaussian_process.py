@@ -1,11 +1,9 @@
-# -*- coding: utf-8 -*-
-
 import numpy as np
 import os
 from datetime import datetime
 import argparse
 import GPy
-from src.data.data_utils import * 
+from data_utils import * 
 
 
 """# GP Experiments"""
@@ -13,7 +11,8 @@ from src.data.data_utils import *
 def main(): 
   parser = argparse.ArgumentParser("Find parameters for Gaussian processes")
   parser.add_argument("--split", type=int, help="Split to train on")
-  parser.add_argument("--dataset", type=str, help="Dataset to train on")
+  parser.add_argument("--dataset", type=str, help="Dataset to train on", choices=['bostonHousing', 'concerete', 'energy', 'kin8nm', 
+      'naval-propulsion-plant', 'power-plant', 'protein-tertiary-structure', 'wine-quality-red', 'yacht'])
   args = parser.parse_args()
   for _DATASET in [args.dataset]: 
     for _METHOD in ['gp']: 
