@@ -58,7 +58,7 @@ revised_fig <- ggplot(data = combined_df %>% filter(traintest=='test') %>%
                    height=0.05)+
   theme_bw(base_size = 20)+
   xlab('Mean Test Set Width')+
-  ylab('Mean Test Set Coverage')+
+  ylab('Mean Test Set Cov.')+
   scale_y_continuous(labels = scales::percent)+
   scale_color_discrete(name="Method",
                        breaks=c("dropout", "ensemble", "gp", "linear_regression", "ll_dropout", "ll_svi", "svi", "temp_scaling", 'vanilla'),
@@ -85,7 +85,7 @@ inset <- ggplot(data = combined_df %>% filter(traintest=='test') %>%
   theme_bw(base_size = 20)+
   scale_y_continuous(labels = scales::percent, limits=c(.9,1))+
   xlab('Mean Test Set Width')+
-  ylab('Mean Test Set Coverage')+
+  ylab('Mean Test Set Cov.')+
   theme(legend.position = "none")
 
 rev_inset <- revised_fig + annotation_custom(ggplotGrob(inset), xmin=1.5, xmax=3, ymin=0.1, ymax=.75)

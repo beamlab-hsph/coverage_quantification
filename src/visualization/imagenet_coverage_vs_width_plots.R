@@ -62,7 +62,7 @@ cifar_wc_facet_plot <- ggplot(imagenet_cifar %>% filter(dataset=='cifar'), aes(y
   #geom_blank(data=imagenet_cifar%>% filter(dataset=='imagenet')) +
   facet_grid(. ~ ordering, switch='x', labeller = as_labeller(split_names))+
   scale_y_continuous(labels = scales::percent, limits=c(0,1))+
-  theme_bw()+
+  theme_bw(base_size = 20)+
   ylab('Coverage')+
   xlab('Width')+
   geom_hline(yintercept = 1-eps_level, color='black')+
