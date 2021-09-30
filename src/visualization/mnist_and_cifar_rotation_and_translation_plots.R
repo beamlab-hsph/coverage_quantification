@@ -5,7 +5,7 @@ library(cowplot)
 library(kableExtra)
 library(egg)
 
-base_dir <- '~/Repos/coverage-quantification/' #wd should be parent dir of the repo
+base_dir <- '~/Repos/coverage_quantification/' #wd should be parent dir of the repo
 uq_tidy <- readRDS(paste0(base_dir, '/data/processed/uq_tidy.rds'))
 
 

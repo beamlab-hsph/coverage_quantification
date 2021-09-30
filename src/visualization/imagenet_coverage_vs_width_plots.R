@@ -3,7 +3,7 @@ library(tidyverse)
  
 eps_level <- .05
 
-base_dir <- '~/Repos/coverage-quantification/' #wd should be parent dir of the repo
+base_dir <- '~/Repos/coverage_quantification/' #wd should be parent dir of the repo
 imagenet_tidy <- readRDS(paste0(base_dir, '/data/processed/imagenet_tidy.rds'))
 imagenet_df <- imagenet_tidy %>% filter(dataset=='imagenet' & eps==eps_level)
 

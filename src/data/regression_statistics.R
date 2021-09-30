@@ -1,7 +1,7 @@
 library(tidyverse)
 library(magrittr)
 
-base_dir <- '~/Repos/coverage-quantification/' # wd should the parent dir of the repo
+base_dir <- '~/Repos/coverage_quantification' # wd should the parent dir of the repo
 
 lr_df <- read_csv(paste0(base_dir, '/data/processed/lr.csv'))
 bayesian_df <- read_csv(paste0(base_dir, '/data/processed/model_output_summary_non_svi_eb.csv'), 
@@ -56,7 +56,7 @@ revised_fig <- ggplot(data = combined_df %>% filter(traintest=='test') %>%
   )+
   geom_errorbarh( aes(xmin = avg_width-sd_width, xmax=avg_width+sd_width, color=factor(method)), 
                    height=0.05)+
-  theme_bw()+
+  theme_bw(base_size = 20)+
   xlab('Mean Test Set Width')+
   ylab('Mean Test Set Coverage')+
   scale_y_continuous(labels = scales::percent)+
@@ -82,7 +82,7 @@ inset <- ggplot(data = combined_df %>% filter(traintest=='test') %>%
   )+
   geom_errorbarh( aes(xmin = avg_width-sd_width, xmax=avg_width+sd_width, color=factor(method)), 
                   height=0.0022)+
-  theme_bw()+
+  theme_bw(base_size = 20)+
   scale_y_continuous(labels = scales::percent, limits=c(.9,1))+
   xlab('Mean Test Set Width')+
   ylab('Mean Test Set Coverage')+
